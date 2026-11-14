@@ -1,0 +1,420 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>N64 Pocket 6.2 — Xbox Web Test</title><style>*{box-sizing:border-box}body{margin:0;background:#0b1120;color:#eef3ff;font:15px system-ui}main{max-width:820px;margin:auto;padding:12px}h1{font-size:23px;margin:5px 0 12px}p{line-height:1.5;color:#b8c8e4}.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}button,.file,select{background:#273d64;color:white;border:1px solid #6485b3;border-radius:11px;padding:12px;font-weight:700;font-size:14px}.file input{display:none}button:disabled{opacity:.5}#game{width:100%;aspect-ratio:4/3;background:#000;border:2px solid #506c9b;border-radius:10px;overflow:hidden}#status{background:#1b2940;padding:12px;border-radius:9px;white-space:pre-wrap;line-height:1.5;overflow-wrap:anywhere;min-height:70px}#log{font:12px monospace;white-space:pre-wrap;overflow-wrap:anywhere;color:#d5e0f2;max-height:200px;overflow:auto;background:#0c1728;padding:10px;border-radius:9px}label{display:inline-flex;align-items:center;gap:6px}small{color:#aebcd4}#controls{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-top:14px;touch-action:none;user-select:none}#pad{display:grid;grid-template:repeat(3,52px)/repeat(3,52px);gap:3px}#pad button{padding:0;font-size:20px}.up{grid-area:1/2}.left{grid-area:2/1}.right{grid-area:2/3}.down{grid-area:3/2}#actions{display:grid;grid-template-columns:repeat(3,55px);gap:6px}#actions button{padding:8px 0;min-height:46px}button.pressed{background:#6c91d2} @media(max-width:400px){#pad{grid-template:repeat(3,43px)/repeat(3,43px)}#actions{grid-template-columns:repeat(3,45px)}#actions button{font-size:12px}} </style></head><body><main><h1>🎮 N64 Pocket 6.2 — Xbox Web Test</h1><p>Escolha uma ROM de Nintendo 64 que você possa utilizar. Este teste identifica falhas de rede antes de tentar iniciar o emulador.</p><div class="bar"><label class="file">📂 ROM <input id="rom" type="file" accept=".z64,.n64,.v64,.zip"></label><select id="server" aria-label="Servidor"><option value="https://cdn.emulatorjs.org/stable/data/">EmulatorJS estável</option><option value="https://cdn.emulatorjs.org/latest/data/">EmulatorJS recente</option></select><button id="check">🔍 Verificar servidor</button><button id="start" disabled>▶ INICIAR</button><button id="full">⛶ Tela cheia</button><button id="turbo" type="button" aria-pressed="true" style="background:#195b43;border-color:#62c89d">⚡ RÁPIDO: AUTO</button></div><section id="webrom" style="padding:14px;background:#172b46;border:1px solid #5478aa;border-radius:12px;margin:12px 0"><h2 style="font-size:19px;margin:0 0 8px">🌐 ROM por endereço HTTPS</h2><p style="margin:4px 0 10px">No Xbox, use um endereço direto de ROM N64 que você tenha autorização para acessar. Não é necessário salvar o arquivo no console. O servidor deve permitir acesso pelo navegador (CORS).</p><div class="bar"><input id="romUrlInput" type="url" placeholder="https://exemplo.org/jogo-homebrew.z64" style="flex:1;min-width:210px;background:#0b182c;color:white;border:1px solid #6485b3;border-radius:9px;padding:12px"><button id="romUrlUse" type="button">Usar URL</button><button id="romUrlClear" type="button">Limpar URL</button></div><small id="romUrlState">Nenhuma URL configurada. Não inclua ROMs comerciais em repositórios públicos sem autorização.</small></section><div id="status">Aguardando seleção da ROM.</div><div id="game"></div><div id="mobilebar"><button id="immersive" type="button">⛶ MODO IMERSIVO</button><button id="leave" type="button">✕ SAIR</button><button id="layout" type="button">🎮 Controles próprios</button></div></div><p><small>Os botões adicionais simulam teclas e podem precisar de remapeamento nas configurações do EmulatorJS. O controle nativo do emulador é a opção preferencial. É necessária internet; arquivos locais do Android podem sofrer restrições de rede.</small></p><p><small>⚡ O modo Rápido fica ligado por padrão após a inicialização. Se o motor não disponibilizar o controle programático, aparecerá um aviso no registro. O áudio pode continuar engasgando.</small></p><h3>Registro de diagnóstico</h3><div id="log"></div><button id="copy">📋 Copiar diagnóstico</button><section id="xboxLab" style="background:#12243a;border:1px solid #5477a8;border-radius:12px;padding:15px;margin:12px 0"><h2 style="margin:0 0 8px;font-size:19px">🎮 Xbox Edge — controle e tela cheia</h2><p>Conecte um controle Xbox e pressione um botão. O painel mostra se o Edge reconhece o controle. O EmulatorJS faz seu próprio mapeamento; confira o menu de controles do emulador se os botões não corresponderem ao N64.</p><div class="bar"><button id="xboxFullscreen" type="button">⛶ Jogar em tela cheia</button><button id="xboxWake" type="button">🎮 Testar controle</button><button id="xboxHelp" type="button">📖 Ver mapeamento sugerido</button></div><pre id="xboxStatus" style="white-space:pre-wrap;overflow-wrap:anywhere;font:13px monospace;line-height:1.6">Aguardando controle Xbox...</pre><div id="xboxMapping" hidden style="line-height:1.65;color:#d4e5ff">Sugestão de mapeamento nas configurações do EmulatorJS: analógico esquerdo → analógico N64; A Xbox → A N64; X Xbox → B N64; gatilho esquerdo → Z; LB/RB → L/R; direcional ou analógico direito → botões C; Menu (≡) → Start. É uma sugestão, não uma configuração automática.</div><div style="margin-top:12px;padding:10px;border:1px solid #42658d;border-radius:9px"><strong>⌨️ Diagnóstico de botões como teclado</strong><p style="margin:5px 0">Selecione o campo abaixo, pressione A/B, direcional e gatilhos no controle. O registro mostrará somente os eventos que chegarem à página.</p><input id="keyFocus" type="text" readonly placeholder="Selecione aqui e aperte os botões" style="width:100%;background:#0b182c;color:white;border:1px solid #6485b3;padding:12px;border-radius:8px"><pre id="keyReport" style="font:12px monospace;white-space:pre-wrap;overflow-wrap:anywhere">Aguardando eventos de teclado...</pre><button id="keyClear" type="button">Limpar registro</button></div><small>Algumas versões do Edge no Xbox não permitem Fullscreen API ou restringem seleção de arquivos locais. Se o botão de tela cheia falhar, use o modo de tela cheia do próprio Edge. A ROM não é incluída.</small></section><section id="audioLab" style="background:#15243a;border:1px solid #51698b;border-radius:12px;padding:12px;margin:12px 0"><h2 style="font-size:18px;margin:0 0 8px">🔊 Laboratório de áudio — 5.8</h2><p style="margin:6px 0">Teste o som sem alterar a ROM ou o núcleo N64. O Fast Forward continua ligado por padrão.</p><div class="bar"><button id="audioUnlock" type="button">▶ Desbloquear áudio</button><button id="audioMute" type="button">🔊 Silenciar</button><label>Volume <input id="audioVolume" type="range" min="0" max="100" value="70"></label><button id="audioReport" type="button">📋 Diagnóstico de áudio</button></div><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0"><label>Buffer experimental <select id="audioBuffer"><option value="0">Original (sem alterações)</option><option value="2048">2048 amostras</option><option value="4096">4096 amostras</option><option value="8192">8192 amostras</option></select></label><button id="toneTest" type="button">🎵 Testar som do Chrome (3 s)</button></div><small>Escolha o buffer <b>antes de iniciar a ROM</b>. Essa alteração só funciona se o núcleo usar ScriptProcessorNode; se usar AudioWorklet, o buffer não será modificado. Buffers maiores podem reduzir cortes, mas aumentam a latência.</small><div style="margin:12px 0;padding:10px;border:1px solid #5274a1;border-radius:10px;background:#101e33"><strong>🧪 Teste de sincronização — 10 segundos</strong><p style="margin:6px 0">Inicie a ROM, entre em uma área com música e toque em <b>Medir 10 s</b>. Deixe a página visível durante o teste. O medidor observa a cadência da imagem e pausas do JavaScript; ele <b>não</b> mede diretamente as amostras de áudio internas do núcleo.</p><div class="bar"><button id="syncStart" type="button">⏱ Medir 10 s</button><button id="syncCopy" type="button">📋 Copiar resultado</button></div><pre id="syncReport" style="font:12px monospace;white-space:pre-wrap;overflow-wrap:anywhere">Aguardando medição.</pre></div><div id="audioBufferStatus" style="font:12px monospace;white-space:pre-wrap;margin:8px 0;color:#c9d9ef">Buffer: aguardando início do jogo.</div><pre id="audioInfo" style="font:12px monospace;white-space:pre-wrap;overflow-wrap:anywhere">Aguardando jogo.</pre><small>O botão de desbloqueio tenta reativar os contextos de áudio criados pelo emulador. Se a lentidão for causada pelo núcleo ou pelo Fast Forward, esta medida não resolve sozinha.</small></section><section id="coreLab" style="background:#17293e;border:1px solid #7192b6;border-radius:12px;padding:12px;margin:12px 0"><h2 style="font-size:18px;margin:0 0 8px">🧬 Diagnóstico 5.8 — núcleo e caminho de áudio</h2><p>Este teste NÃO modifica o motor nem promete corrigir o som. Registra APIs de áudio utilizadas, relógio do AudioContext e indicadores expostos pelo núcleo, se existirem.</p><div class="bar"><button type="button" id="coreMeasure">⏱ Investigar por 10 s</button><button type="button" id="coreCopy">📋 Copiar investigação</button></div><pre id="coreReport" style="white-space:pre-wrap;overflow-wrap:anywhere;font:12px monospace">Inicie a ROM antes de investigar.</pre><small>Comece a investigação após entrar numa área com música. Alguns indicadores podem estar indisponíveis no núcleo; isso será mostrado como «não exposto», nunca como zero.</small></section><section id="schedulerLab" style="background:#152b30;border:1px solid #599e9b;border-radius:12px;padding:12px;margin:12px 0"><h2 style="font-size:18px;margin:0 0 8px">🔊 5.9 — Analisador de agendamento</h2><p>Monitora quando os fragmentos de áudio são agendados no relógio do AudioContext, mede lacunas e sobreposições. A análise não modifica o som.</p><div class="bar"><button id="schedulerMeasure" type="button">⏱ Analisar 10 s</button><button id="schedulerCopy" type="button">📋 Copiar relatório</button></div><pre id="schedulerReport" style="font:12px monospace;white-space:pre-wrap;overflow-wrap:anywhere">Inicie o jogo e depois toque em Analisar.</pre><small>Limitação: lacunas calculadas entre buffers agendados não provam silêncio audível; o núcleo pode misturar fontes. Este teste não mede o FPS do N64. Não modifica os horários de reprodução.</small></section><section id="fixLab" style="background:#203024;border:1px solid #65a97c;border-radius:12px;padding:12px;margin:12px 0"><h2 style="font-size:18px;margin:0 0 8px">🛠️ 6.0 — Correção experimental de agendamento</h2><p>Compare o áudio original com o modo de alinhamento. A correção começa <b>desligada</b> e só ajusta a hora de início de fragmentos curtos; não cria amostras de áudio que o núcleo deixou de produzir.</p><div class="bar"><button id="fixToggle" type="button" aria-pressed="false">🔴 Correção: DESLIGADA</button><button id="fixReset" type="button">↺ Reiniciar estatísticas</button></div><div style="display:flex;gap:8px;flex-wrap:wrap"><label>Limite de ajuste <select id="fixLimit"><option value="8">8 ms (conservador)</option><option value="20" selected>20 ms (equilibrado)</option><option value="40">40 ms (agressivo)</option></select></label><label>Adiantamento máximo <select id="fixLead"><option value="40">40 ms</option><option value="80" selected>80 ms</option><option value="120">120 ms</option></select></label></div><pre id="fixReport" style="font:12px monospace;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:12px">Correção desligada. Inicie a ROM e ative durante uma música.</pre><small>Se ouvir áudio acelerado, sobreposto ou atrasado, desligue a correção. O modo não altera a ROM e pode ser revertido imediatamente. As estatísticas medem apenas as fontes interceptadas após a ativação.</small></section></main><script>
+(()=>{'use strict';const $=id=>document.getElementById(id);let rom=null,started=false,romUrl=null;let turboWanted=true,turboApplied=false;
+function manager(){const e=window.EJS_emulator;return e?.gameManager||e?.game?.gameManager||e?.gameManagerInstance||null}
+function turboApply(){const e=window.EJS_emulator,m=manager();if(!m)return false;try{
+ if(typeof m.toggleFastForward==='function')m.toggleFastForward(turboWanted?1:0);
+ else if(typeof m.simulateInput==='function')m.simulateInput(0,27,turboWanted?1:0);
+ else return false;
+ if(e)e.isFastForward=turboWanted;
+ turboApplied=true;log('Modo rápido '+(turboWanted?'ativado':'desativado')+' via motor.');return true
+ }catch(err){log('Erro no modo rápido: '+err.message);return false}}
+function turboButton(){const b=$('turbo');b.textContent=turboWanted?'⚡ RÁPIDO: AUTO':'⚡ RÁPIDO: OFF';b.setAttribute('aria-pressed',String(turboWanted));b.style.background=turboWanted?'#195b43':'#273d64'}
+$('turbo').onclick=()=>{turboWanted=!turboWanted;turboApplied=false;turboButton();if(started&&!turboApply())status('Motor ainda não pronto para alterar o modo rápido.');};
+function log(s){let t=new Date().toLocaleTimeString();$('log').textContent+='['+t+'] '+s+'\n';console.log(s)}function status(s){$('status').textContent=s;log(s)}function origin(){return $('server').value}log('Página: '+location.protocol+' | WebAssembly: '+!!window.WebAssembly+' | WebGL2: '+!!document.createElement('canvas').getContext('webgl2'));$('rom').onchange=e=>{rom=e.target.files[0];window.n64RemoteRom='';if(!rom)return;status('Arquivo selecionado: '+rom.name+' ('+(rom.size/1048576).toFixed(2)+' MiB).');$('start').disabled=false};async function probe(){let base=origin();status('Testando: '+base+'loader.js');try{let c=new AbortController(),tm=setTimeout(()=>c.abort(),12000);let r=await fetch(base+'loader.js',{cache:'no-store',signal:c.signal});clearTimeout(tm);let type=r.headers.get('content-type')||'desconhecido';log('HTTP '+r.status+' | Content-Type '+type);if(!r.ok)throw Error('HTTP '+r.status);let content=await r.text();if(content.length<100||content.trim().startsWith('<'))throw Error('Resposta não parece JavaScript');status('Loader acessível ('+content.length+' caracteres). Isso NÃO garante que o núcleo N64 esteja disponível.');return true}catch(e){status('Falha no teste: '+e.message+'. Pode ser rede, CORS, bloqueio de arquivo local ou servidor indisponível.');return false}}$('romUrlUse').onclick=()=>{const raw=$('romUrlInput').value.trim();let u;try{u=new URL(raw);if(u.protocol!=='https:')throw Error('Use HTTPS');if(u.username||u.password)throw Error('Não use credenciais na URL');}catch(e){status('Endereço inválido: '+e.message);return;}window.n64RemoteRom=u.href;rom=null;$('romUrlState').textContent='URL configurada: '+u.origin+' (o acesso real só será testado ao iniciar).';$('start').disabled=false;status('ROM remota configurada. Clique em INICIAR.');};$('romUrlClear').onclick=()=>{window.n64RemoteRom='';$('romUrlInput').value='';$('romUrlState').textContent='Nenhuma URL configurada.';if(!rom)$('start').disabled=true;};$('check').onclick=probe;$('start').onclick=async()=>{if(started||(!rom&&!window.n64RemoteRom))return;if(!(await probe()))return;started=true;$('start').disabled=true;$('rom').disabled=true;$('romUrlInput').disabled=true;$('server').disabled=true;romUrl=window.n64RemoteRom||URL.createObjectURL(rom);window.EJS_VirtualGamepadSettings = window.n64Layout === 'original' ? undefined : [];window.EJS_controlScheme='n64';window.EJS_player='#game';window.EJS_core='n64';window.EJS_gameUrl=romUrl;window.EJS_pathtodata=origin();window.EJS_startOnLoaded=true;window.EJS_color='#4265a3';window.EJS_language='pt-BR';window.EJS_volume=.7;window.EJS_onGameStart=()=>{status('O núcleo iniciou a execução do jogo. Ativando modo rápido automático...');setTimeout(()=>{if(!turboApply())log('Modo rápido: API não disponível nesta versão. Use o botão Rápido nativo.');},400)};window.EJS_onLoadState=()=>log('Estado carregado');status('Loader confirmado. Tentando inicializar o núcleo Nintendo 64...');let script=document.createElement('script');script.src=origin()+'loader.js';script.onerror=()=>status('Falha ao executar loader.js.');document.body.appendChild(script)};let turboAttempts=0;const turboWatcher=setInterval(()=>{if(!started||turboApplied||!manager()||turboAttempts>40)return;turboAttempts++;turboApply()},750);window.addEventListener('error',e=>{if(e.message)log('Erro JS: '+e.message)});window.addEventListener('unhandledrejection',e=>log('Promise rejeitada: '+String(e.reason)));$('full').onclick=()=>($('game').requestFullscreen?.()||Promise.reject(Error('Tela cheia indisponível'))).catch(e=>status(e.message));$('copy').onclick=()=>{navigator.clipboard?.writeText($('log').textContent).then(()=>status('Diagnóstico copiado.')).catch(()=>status('Selecione o texto do registro para copiar.'))};})();
+</script><style>
+#controls,#pad,#actions{display:none!important}#mobilebar{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}#leave{display:none}body.immersive{overflow:hidden;background:#000}body.immersive main{max-width:none;margin:0;padding:0}body.immersive main>h1,body.immersive main>p,body.immersive .bar,body.immersive #status,body.immersive #log,body.immersive h3,body.immersive #copy{display:none!important}body.immersive #game{position:fixed;inset:0;width:100vw;height:100dvh;aspect-ratio:auto;border:0;border-radius:0;z-index:5;background:#000}body.immersive #mobilebar{position:fixed;top:env(safe-area-inset-top,4px);left:8px;z-index:9999;margin:0;opacity:.55}body.immersive #mobilebar button{padding:6px 9px;font-size:12px}body.immersive #leave{display:block}body.immersive #immersive{display:none}#game{touch-action:none}body.immersive #game canvas{object-fit:contain!important}
+</style><script>
+(()=>{const $=id=>document.getElementById(id);window.n64Layout=localStorage.getItem('n64mode')||'original';$('layout').textContent=window.n64Layout==='mobile'?'🎮 Controles próprios':'🎮 Controles nativos';$('layout').onclick=()=>{window.n64Layout=window.n64Layout==='mobile'?'original':'mobile';localStorage.setItem('n64mode',window.n64Layout);$('layout').textContent=window.n64Layout==='mobile'?'🎮 Controles próprios':'🎮 Controles nativos';alert('Recarregue a página e selecione a ROM novamente para alternar.');};$('immersive').onclick=async()=>{document.body.classList.add('immersive');try{await document.documentElement.requestFullscreen()}catch(e){}try{await screen.orientation.lock('landscape')}catch(e){}};$('leave').onclick=async()=>{document.body.classList.remove('immersive');if(document.fullscreenElement)try{await document.exitFullscreen()}catch(e){}};document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement)document.body.classList.remove('immersive')});})();
+</script><style>
+#n64overlay{display:none;position:fixed;inset:0;z-index:120;pointer-events:none;touch-action:none;font-family:system-ui;color:white;user-select:none;-webkit-user-select:none}
+body.immersive.custompad #n64overlay{display:block}
+.n64btn,.n64stick{position:absolute;pointer-events:auto;touch-action:none;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;color:#fff;background:rgba(35,47,64,.48);border:1.5px solid rgba(226,240,255,.65);border-radius:50%;font-weight:800;font-size:clamp(11px,2.3vh,18px);box-shadow:0 2px 9px #0005}
+.n64btn.active{background:rgba(115,165,245,.8)}.n64btn.small{width:clamp(34px,9vh,52px);height:clamp(34px,9vh,52px)}.n64btn.medium{width:clamp(43px,12vh,68px);height:clamp(43px,12vh,68px)}
+.n64btn.c{background:rgba(170,121,13,.48)}.n64btn.a{background:rgba(30,87,187,.62)}.n64btn.b{background:rgba(33,133,70,.62)}
+.n64stick{left:5%;bottom:10%;width:clamp(92px,29vh,168px);height:clamp(92px,29vh,168px);background:rgba(30,50,78,.26);border:2px solid #8da4b78c}
+#n64nub{width:42%;height:42%;border-radius:50%;background:rgba(145,172,200,.68);box-shadow:0 2px 9px #0006;transform:translate(0,0)}
+#n64overlay .top-left{left:5%;top:17%}#n64overlay .top-left2{left:12%;top:17%}
+#n64overlay .top-right{right:5%;top:16%}#n64overlay .c-up{right:12%;top:30%}#n64overlay .c-left{right:17%;top:43%}#n64overlay .c-right{right:7%;top:43%}#n64overlay .c-down{right:12%;top:56%}
+#n64overlay .btn-a{right:4%;bottom:9%}#n64overlay .btn-b{right:15%;bottom:9%}
+#n64overlay .btn-start{left:calc(50% - 24px);bottom:4%;width:48px;height:32px;border-radius:14px;font-size:10px}
+#n64overlay .btn-z{left:20%;bottom:8%}
+#n64overlay .btn-l{left:5%;top:17%}#n64overlay .btn-r{right:5%;top:17%}
+#padstatus{position:fixed;left:50%;transform:translateX(-50%);top:8%;background:#071323de;color:#fff;padding:6px 12px;border-radius:8px;z-index:125;display:none;font:12px system-ui}
+@media(orientation:portrait){#n64overlay .n64stick{bottom:12%}}
+</style>
+<div id="n64overlay" aria-label="Controles Nintendo 64">
+<div class="n64stick" id="n64stick"><div id="n64nub"></div></div>
+<div class="n64btn small btn-z" data-input="10">Z</div>
+<div class="n64btn small btn-l" data-input="11">L</div><div class="n64btn small btn-r" data-input="12">R</div>
+<div class="n64btn small c c-up" data-input="13">C↑</div><div class="n64btn small c c-left" data-input="14">C←</div><div class="n64btn small c c-right" data-input="15">C→</div><div class="n64btn small c c-down" data-input="9">C↓</div>
+<div class="n64btn medium b btn-b" data-input="0">B</div><div class="n64btn medium a btn-a" data-input="8">A</div>
+<div class="n64btn btn-start" data-input="3">START</div></div>
+<div id="padstatus"></div>
+<script>
+(()=>{'use strict';const $=id=>document.getElementById(id);const ov=$('n64overlay');const toast=$('padstatus');let notified=false;
+function mgr(){const e=window.EJS_emulator;return e?.gameManager||e?.game?.gameManager||e?.gameManagerInstance||null}
+function input(idx,value){const m=mgr();if(!m||typeof m.simulateInput!=='function'){if(!notified){notified=true;toast.textContent='API de controle indisponível: use Controles nativos';toast.style.display='block';setTimeout(()=>toast.style.display='none',5000)}return false}try{m.simulateInput(0,idx,value);return true}catch(e){return false}}
+const down=new Set();function releaseAll(){for(const n of down)input(n,0);down.clear()}
+for(const b of ov.querySelectorAll('[data-input]')){const n=+b.dataset.input;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);input(n,1);down.add(n);b.classList.add('active')});const up=e=>{e.preventDefault();input(n,0);down.delete(n);b.classList.remove('active')};b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('lostpointercapture',()=>{input(n,0);down.delete(n);b.classList.remove('active')})}
+const stick=$('n64stick'),nub=$('n64nub');let stickId=null;const dirs=[19,18,17,16];let activeDirs=new Set();function update(e){const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let x=(e.clientX-cx)/(r.width*.42),y=(e.clientY-cy)/(r.height*.42);const len=Math.hypot(x,y);if(len>1){x/=len;y/=len}nub.style.transform=`translate(${x*r.width*.29}px,${y*r.height*.29}px)`;const next=new Set();if(y<-.25)next.add(19);if(y>.25)next.add(18);if(x<-.25)next.add(17);if(x>.25)next.add(16);for(const d of activeDirs)if(!next.has(d))input(d,0);for(const d of next)if(!activeDirs.has(d))input(d,1);activeDirs=next}
+function reset(){for(const d of activeDirs)input(d,0);activeDirs.clear();nub.style.transform='translate(0,0)';stickId=null}
+stick.addEventListener('pointerdown',e=>{e.preventDefault();if(stickId!==null)return;stickId=e.pointerId;stick.setPointerCapture(e.pointerId);update(e)});stick.addEventListener('pointermove',e=>{if(e.pointerId===stickId){e.preventDefault();update(e)}});for(const type of ['pointerup','pointercancel','lostpointercapture'])stick.addEventListener(type,e=>{if(e.pointerId===stickId)reset()});window.addEventListener('blur',()=>{reset();releaseAll()});
+function sync(){document.body.classList.toggle('custompad',window.n64Layout==='mobile');}sync();$('layout').addEventListener('click',()=>{sync()});
+})();
+</script><script>
+(()=>{'use strict';
+const contexts=new Set();window.n64AudioContexts=contexts;
+for(const name of ['AudioContext','webkitAudioContext']){
+ const Native=window[name];if(!Native||Native.__n64Tracked)continue;
+ try{const Wrapped=function(...args){const c=new Native(...args);contexts.add(c);return c};Wrapped.prototype=Native.prototype;Object.setPrototypeOf(Wrapped,Native);Wrapped.__n64Tracked=true;window[name]=Wrapped}catch(e){}
+}
+const $=id=>document.getElementById(id);
+let muted=false;
+function mgr(){const e=window.EJS_emulator;return e?.gameManager||e?.game?.gameManager||e?.gameManagerInstance||null}
+function setVolume(v){const e=window.EJS_emulator,m=mgr();let done=false;
+ for(const obj of [m,e]){if(!obj)continue;for(const method of ['setVolume','changeVolume']){if(typeof obj[method]==='function'){try{obj[method](v);done=true;break}catch(err){}}}}
+ window.EJS_volume=v;
+ return done;
+}
+function report(){const e=window.EJS_emulator,m=mgr();const lines=[`Contextos capturados: ${contexts.size}`,`Estados: ${[...contexts].map(c=>c.state).join(', ')||'nenhum'}`,`Taxas de amostragem: ${[...contexts].map(c=>c.sampleRate).join(', ')||'não disponíveis'}`,`API de volume detectada: ${!!(m?.setVolume||e?.setVolume||m?.changeVolume||e?.changeVolume)}`,`Fast Forward solicitado: ${document.getElementById('turbo')?.getAttribute('aria-pressed')}`,`Motor disponível: ${!!m}`,`Visibilidade: ${document.visibilityState}`,`Buffer experimental: ${JSON.stringify(window.n64AudioBufferReport?.()||{})}`];$('audioInfo').textContent=lines.join('\n');return lines.join('\n')}
+$('audioUnlock').addEventListener('click',async()=>{const results=await Promise.allSettled([...contexts].map(c=>c.resume()));$('audioInfo').textContent=`Reativação solicitada em ${results.length} contexto(s).\n`+report()});
+$('audioMute').addEventListener('click',()=>{muted=!muted;const v=muted?0:Number($('audioVolume').value)/100;const ok=setVolume(v);$('audioMute').textContent=muted?'🔇 Reativar som':'🔊 Silenciar';$('audioInfo').textContent=(ok?'Volume enviado ao emulador.':'API de volume não identificada; configuração pode não mudar em tempo real.')+'\n'+report()});
+$('audioVolume').addEventListener('input',()=>{muted=false;$('audioMute').textContent='🔊 Silenciar';setVolume(Number($('audioVolume').value)/100)});
+$('audioReport').addEventListener('click',()=>{const txt=report();navigator.clipboard?.writeText(txt).catch(()=>{})});
+window.addEventListener('pageshow',()=>{for(const c of contexts)if(c.state==='suspended')$('audioInfo').textContent='Áudio suspenso. Toque em Desbloquear áudio.'});
+})();
+</script><script>
+/* N64 Pocket 5.6: experimental buffer override, no changes to ROM/core/controls */
+(()=>{'use strict';
+ const $=id=>document.getElementById(id);
+ const select=$('audioBuffer'),out=$('audioBufferStatus');
+ let calls=0,modified=0,requested=0,detected=[];
+ const originalMethods=new Map();
+ function patchPrototype(proto){if(!proto)return;
+  for(const method of ['createScriptProcessor','createJavaScriptNode']){
+   const original=proto[method];if(typeof original!=='function'||originalMethods.has(method))continue;
+   originalMethods.set(method,original);
+   try{proto[method]=function(size,inputs,outputs){
+     calls++;const requestedSize=Number(select.value)||0;
+     const sizeToUse=requestedSize||size;
+     detected.push(String(size??'default')+'→'+String(sizeToUse??'default'));
+     if(requestedSize && sizeToUse!==size)modified++;
+     update();
+     return original.call(this,sizeToUse,inputs,outputs);
+   }}catch(e){out.textContent='Não foi possível instalar o teste de buffer: '+e.message}
+  }
+ }
+ const AudioCtx=window.AudioContext||window.webkitAudioContext;
+ if(AudioCtx)patchPrototype(AudioCtx.prototype);
+ function update(){out.textContent='Chamadas ScriptProcessor: '+calls+' | Buffers alterados: '+modified+'\n'+(detected.length?'Solicitações: '+detected.slice(-4).join(', '):'Nenhum ScriptProcessor detectado. O núcleo pode usar AudioWorklet ou outra saída.')}
+ select.addEventListener('change',()=>{requested=Number(select.value)||0;update();if(window.EJS_emulator)out.textContent+='\n⚠️ Reinicie a página e carregue a ROM novamente para aplicar a seleção com segurança.'});
+ $('toneTest').addEventListener('click',async()=>{
+   const C=window.AudioContext||window.webkitAudioContext;if(!C){out.textContent='Web Audio indisponível.';return}
+   const b=$('toneTest');b.disabled=true;
+   let ctx;
+   try{
+    ctx=new C();await ctx.resume();const osc=ctx.createOscillator(),gain=ctx.createGain();
+    osc.type='sine';osc.frequency.value=440;gain.gain.value=.06;
+    osc.connect(gain);gain.connect(ctx.destination);
+    const t=ctx.currentTime;gain.gain.setValueAtTime(0,t);gain.gain.linearRampToValueAtTime(.06,t+.03);gain.gain.setValueAtTime(.06,t+2.7);gain.gain.linearRampToValueAtTime(0,t+2.95);
+    osc.start(t);osc.stop(t+3);out.textContent='Teste Chrome: tom contínuo por 3 segundos. Compare com a música do jogo.\nTaxa de amostragem: '+ctx.sampleRate+' Hz'+(ctx.baseLatency!=null?' | Latência base: '+ctx.baseLatency.toFixed(3)+' s':'');
+    osc.onended=()=>{ctx.close().catch(()=>{});b.disabled=false};
+   }catch(e){out.textContent='Teste falhou: '+e.message;b.disabled=false;ctx?.close().catch(()=>{})}
+ });
+ window.n64AudioBufferReport=()=>({calls,modified,detected:detected.slice(-10),selected:select.value});
+ update();
+})();
+</script><script>
+/* N64 Pocket 5.7 — non-invasive timing diagnostic; 5.6 audio controls retained. */
+(()=>{'use strict';
+ const $=id=>document.getElementById(id);
+ let running=false, report='';
+ $('syncStart').onclick=async()=>{
+  if(running)return;
+  if(!window.EJS_emulator){$('syncReport').textContent='Inicie a ROM antes de medir.';return;}
+  running=true;$('syncStart').disabled=true;
+  const samples=[],longTasks=[];let last=0,observer=null,hidden=false;
+  try{if(typeof PerformanceObserver!=='undefined'&&PerformanceObserver.supportedEntryTypes?.includes('longtask')){
+    observer=new PerformanceObserver(list=>{for(const x of list.getEntries())longTasks.push(x.duration)});
+    observer.observe({entryTypes:['longtask']});
+  }}catch(e){}
+  const audioContexts=window.n64AudioContexts;
+  const stateStart=audioContexts?[...audioContexts].map(c=>c.state+'@'+c.sampleRate):[];
+  const t0=performance.now();let frames=0;
+  $('syncReport').textContent='Medindo por 10 segundos... Mantenha o jogo visível.';
+  await new Promise(resolve=>{
+    function frame(now){
+      if(document.hidden)hidden=true;
+      if(last)samples.push(now-last);
+      last=now;frames++;
+      if(now-t0>=10000){resolve();return}
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  });
+  observer?.disconnect();
+  const elapsed=(performance.now()-t0)/1000;
+  const sorted=[...samples].sort((a,b)=>a-b);
+  const percentile=p=>sorted.length?sorted[Math.min(sorted.length-1,Math.floor((sorted.length-1)*p))]:0;
+  const gaps=samples.filter(x=>x>50).length;
+  const bigGaps=samples.filter(x=>x>100).length;
+  const avg=samples.length?samples.reduce((a,b)=>a+b,0)/samples.length:0;
+  const currentContexts=audioContexts?[...audioContexts].map(c=>c.state+'@'+c.sampleRate):[];
+  const scriptReport=window.n64AudioBufferReport?.();
+  report=[
+    'N64 Pocket 5.7 — medição de sincronização',
+    'Duração: '+elapsed.toFixed(2)+' s',
+    'Quadros da página: '+frames+' (~'+(frames/elapsed).toFixed(1)+' FPS de apresentação; NÃO é FPS do núcleo N64)',
+    'Intervalo médio: '+avg.toFixed(1)+' ms',
+    'Intervalo mediano: '+percentile(.5).toFixed(1)+' ms',
+    'Intervalo p95: '+percentile(.95).toFixed(1)+' ms',
+    'Intervalo máximo: '+percentile(1).toFixed(1)+' ms',
+    'Pausas >50 ms: '+gaps+' | >100 ms: '+bigGaps,
+    'Tarefas longas JS: '+longTasks.length+' | maior: '+(longTasks.length?Math.max(...longTasks).toFixed(1):'não detectada')+' ms',
+    'Página ficou oculta: '+(hidden?'SIM':'não'),
+    'Áudio início: '+(stateStart.join(', ')||'não capturado'),
+    'Áudio fim: '+(currentContexts.join(', ')||'não capturado'),
+    'ScriptProcessor: '+JSON.stringify(scriptReport||{}),
+    'Fast Forward solicitado: '+$('turbo').getAttribute('aria-pressed'),
+    '',
+    'Interpretação: pausas frequentes da página podem coincidir com falhas sonoras. Sem pausas, o defeito pode estar dentro do núcleo ou no caminho de áudio; este teste não determina a causa sozinho.'
+  ].join('\n');
+  $('syncReport').textContent=report;
+  $('syncStart').disabled=false;running=false;
+ };
+ $('syncCopy').onclick=async()=>{if(!report){$('syncReport').textContent='Faça a medição primeiro.';return;}try{await navigator.clipboard.writeText(report);$('syncReport').textContent=report+'\n\nCopiado.'}catch(e){$('syncReport').textContent=report+'\n\nSelecione o texto para copiar (área de transferência indisponível).'}};
+})();
+</script><script>
+/* 5.8: instrumentation installed before loader (which is loaded on button click). */
+(()=>{'use strict';
+ const $=id=>document.getElementById(id);
+ const stats={workletModules:0,workletNodes:0,bufferSources:0,bufferStarts:0,bufferEnds:0,mediaSources:0,processorNodes:0,contexts:0,errors:[],workletNames:[],bufferDurations:[]};
+ window.n64Core58Stats=stats;
+ function wrap(proto,name,fn){if(!proto||typeof proto[name]!=='function')return;const old=proto[name];try{proto[name]=function(...args){return fn.call(this,old,args)}}catch(e){stats.errors.push(name+': '+e.message)}}
+ const AC=window.AudioContext||window.webkitAudioContext;
+ if(AC){
+  wrap(AC.prototype,'createBufferSource',function(old,args){stats.bufferSources++;const n=old.apply(this,args);wrap(n,'start',function(start,params){stats.bufferStarts++;if(n.buffer)stats.bufferDurations.push(Number(n.buffer.duration.toFixed(3)));return start.apply(this,params)});n.addEventListener?.('ended',()=>stats.bufferEnds++);return n});
+  wrap(AC.prototype,'createMediaElementSource',function(old,args){stats.mediaSources++;return old.apply(this,args)});
+  const proto=window.AudioWorklet?.prototype;
+  wrap(proto,'addModule',function(old,args){stats.workletModules++;return old.apply(this,args)});
+ }
+ // AudioWorkletNode is a constructor, so observe creations without altering arguments.
+ if(typeof window.AudioWorkletNode==='function'){
+  const Original=window.AudioWorkletNode;
+  try{window.AudioWorkletNode=new Proxy(Original,{construct(target,args,newTarget){const node=Reflect.construct(target,args,newTarget);stats.workletNodes++;stats.workletNames.push(String(args[1]||'unknown').slice(0,70));return node}})}catch(e){stats.errors.push('WorkletNode: '+e.message)}
+ }
+ function mgr(){const e=window.EJS_emulator;return e?.gameManager||e?.game?.gameManager||e?.gameManagerInstance||null}
+ function readable(v){return typeof v==='number'&&Number.isFinite(v)?v:typeof v==='boolean'?v:null}
+ function metrics(obj){if(!obj)return{};const out={};for(const k of ['fps','FPS','frameRate','framerate','speed','speedPercent','emulationSpeed','frames','frameCount','frameCounter','audioLatency','audioBufferSize','audioQueueSize','audioSamples','sampleRate','audioSampleRate']){try{const v=readable(obj[k]);if(v!==null)out[k]=v}catch(e){}}return out}
+ function clock(){return (window.n64AudioContexts?[...window.n64AudioContexts]:[]).map(c=>({state:c.state,sampleRate:c.sampleRate,currentTime:+c.currentTime.toFixed(3),baseLatency:c.baseLatency??null,outputLatency:c.outputLatency??null}))}
+ let last='';
+ $('coreMeasure').onclick=async()=>{
+  if(!window.EJS_emulator){$('coreReport').textContent='Inicie a ROM antes do teste.';return}
+  const btn=$('coreMeasure');btn.disabled=true;
+  const m=mgr(),e=window.EJS_emulator;
+  const first={m:metrics(m),e:metrics(e),clock:clock(),stats:{...stats}};
+  const start=performance.now();let samples=0,late=0,maxDelay=0,previous=start;
+  $('coreReport').textContent='Investigando por 10 segundos...';
+  await new Promise(resolve=>{const interval=setInterval(()=>{const now=performance.now();const gap=now-previous;previous=now;samples++;if(gap>250)late++;maxDelay=Math.max(maxDelay,gap);if(now-start>=10000){clearInterval(interval);resolve()}},100)});
+  const second={m:metrics(mgr()),e:metrics(window.EJS_emulator),clock:clock(),stats:{...stats}};
+  const elapsed=(performance.now()-start)/1000;
+  function diffs(a,b){const out={};for(const k of Object.keys(b)){if(typeof a[k]==='number'&&typeof b[k]==='number')out[k]=+(b[k]-a[k]).toFixed(3)}return out}
+  const delta=diffs(first.m,second.m);
+  const possibleFrameKeys=Object.keys(delta).filter(k=>/frames|frameCount|frameCounter/i.test(k));
+  const frameRates=Object.fromEntries(possibleFrameKeys.map(k=>[k,+(delta[k]/elapsed).toFixed(2)]));
+  const audioDelta=second.clock.map((c,i)=>({state:c.state,clockAdvanceSeconds:first.clock[i]?+(c.currentTime-first.clock[i].currentTime).toFixed(3):'contexto novo'}));
+  const lines=[
+   'N64 Pocket 5.8 — diagnóstico de núcleo e áudio',
+   'Duração: '+elapsed.toFixed(2)+' s',
+   'Motor detectado: '+!!mgr(),
+   'Métricas expostas (início): '+JSON.stringify(first.m),
+   'Métricas expostas (fim): '+JSON.stringify(second.m),
+   'Diferenças numéricas: '+JSON.stringify(delta),
+   'Contadores de quadros observáveis por segundo: '+(possibleFrameKeys.length?JSON.stringify(frameRates):'não expostos pelo motor (FPS real NÃO medido)'),
+   'Métricas adicionais do emulador: '+JSON.stringify(second.e),
+   'Contextos de áudio: '+JSON.stringify(second.clock),
+   'Avanço do relógio de áudio: '+JSON.stringify(audioDelta),
+   'AudioWorklet.addModule: '+second.stats.workletModules+' | AudioWorkletNode: '+second.stats.workletNodes,
+   'Nomes Worklet: '+JSON.stringify(second.stats.workletNames.slice(-8)),
+   'AudioBufferSourceNode criados: '+second.stats.bufferSources+' | iniciados: '+second.stats.bufferStarts+' | finalizados: '+second.stats.bufferEnds,
+   'Durações de buffers observados (últimos 12): '+JSON.stringify(second.stats.bufferDurations.slice(-12)),
+   'MediaElementAudioSource: '+second.stats.mediaSources,
+   'ScriptProcessor: '+JSON.stringify(window.n64AudioBufferReport?.()||{}),
+   'Temporizadores 100ms atrasados >250ms: '+late+' | maior intervalo: '+maxDelay.toFixed(1)+' ms',
+   'Fast Forward solicitado: '+$('turbo').getAttribute('aria-pressed'),
+   'Erros de instrumentação: '+JSON.stringify(second.stats.errors),
+   'AVISO: ausência de métricas não comprova ausência de áudio; o núcleo pode usar WebAssembly ou outra API não observada.'
+  ];last=lines.join('\n');$('coreReport').textContent=last;btn.disabled=false;
+ };
+ $('coreCopy').onclick=async()=>{if(!last){$('coreReport').textContent='Faça o teste primeiro.';return}try{await navigator.clipboard.writeText(last);$('coreReport').textContent=last+'\n\nCopiado.'}catch(e){$('coreReport').textContent=last+'\n\nSelecione o texto para copiar.'}};
+})();
+</script><script>
+/* 5.9 — observação passiva de AudioBufferSourceNode.start. Instalação anterior ao carregamento do EmulatorJS. */
+(()=>{'use strict';
+ const $=id=>document.getElementById(id);
+ const AC=window.AudioContext||window.webkitAudioContext;
+ let active=false, entries=[], lastReport='';
+ const MAX=12000;
+ if(AC && typeof AC.prototype.createBufferSource==='function'){
+  const originalCreate=AC.prototype.createBufferSource;
+  AC.prototype.createBufferSource=function(...args){
+   const ctx=this, node=originalCreate.apply(this,args);
+   const start=node.start;
+   node.start=function(...params){
+    if(active && entries.length<MAX){
+     const now=ctx.currentTime;
+     const requested=Number(params[0]||0);
+     const when=Math.max(now,requested);
+     const duration=node.buffer?.duration;
+     const offset=Number(params[1]||0);
+     const requestedDuration=params.length>=3?Number(params[2]):null;
+     const playDuration=Number.isFinite(duration)?Math.max(0,Math.min(requestedDuration??duration,Math.max(0,duration-offset))):null;
+     entries.push({ctx,when,now,duration:playDuration,explicit:params.length>0,requested,wall:performance.now()});
+    }
+    return start.apply(this,params);
+   };
+   return node;
+  };
+ }
+ $('schedulerMeasure').onclick=async()=>{
+  if(!window.EJS_emulator){$('schedulerReport').textContent='Inicie a ROM primeiro.';return}
+  const btn=$('schedulerMeasure');btn.disabled=true;entries=[];active=true;
+  $('schedulerReport').textContent='Observando agendamentos por 10 segundos...';
+  const start=performance.now();await new Promise(r=>setTimeout(r,10000));active=false;
+  const elapsed=(performance.now()-start)/1000;
+  const contexts=new Map();for(const e of entries){if(!contexts.has(e.ctx))contexts.set(e.ctx,[]);contexts.get(e.ctx).push(e)}
+  let gapCount=0,gapMs=0,maxGap=0,overlapCount=0,overlapMs=0,lateCount=0,immediate=0,scheduled=0,valid=0,shortBuffers=0;
+  const contextLines=[];
+  for(const [ctx,arr] of contexts){
+   arr.sort((a,b)=>a.when-b.when);
+   let lastEnd=null,cg=0,co=0;
+   for(const e of arr){
+    if(!Number.isFinite(e.duration))continue;
+    valid++;
+    if(e.duration<0.01)shortBuffers++;
+    if(e.requested>0.001)scheduled++;else immediate++;
+    if(e.requested>0.001 && e.requested<e.now-0.002)lateCount++;
+    if(lastEnd!==null){const diff=e.when-lastEnd;
+     if(diff>0.001){gapCount++;cg++;gapMs+=diff*1000;maxGap=Math.max(maxGap,diff*1000)}
+     else if(diff< -0.001){overlapCount++;co++;overlapMs+=-diff*1000}
+    }
+    lastEnd=Math.max(lastEnd??-Infinity,e.when+e.duration);
+   }
+   contextLines.push(`Contexto ${contextLines.length+1}: ${arr.length} fontes | ${cg} lacunas | ${co} sobreposições | sampleRate ${ctx.sampleRate}`);
+  }
+  const total=entries.length;
+  const lines=[
+   'N64 Pocket 5.9 — análise de agendamento de áudio',
+   'Duração: '+elapsed.toFixed(2)+' s',
+   'Fontes observadas: '+total+' ('+(total/elapsed).toFixed(1)+'/s)',
+   'Fontes com duração observável: '+valid,
+   'Buffers com menos de 10 ms: '+shortBuffers,
+   'Inícios imediatos (when=0): '+immediate+' | agendados no futuro/relógio: '+scheduled,
+   'Inícios agendados no passado (>2 ms): '+lateCount,
+   'Lacunas de agenda >1 ms: '+gapCount+' | soma: '+gapMs.toFixed(1)+' ms | maior: '+maxGap.toFixed(2)+' ms',
+   'Sobreposições de agenda >1 ms: '+overlapCount+' | soma: '+overlapMs.toFixed(1)+' ms',
+   ...contextLines,
+   'Fast Forward solicitado: '+$('turbo').getAttribute('aria-pressed'),
+   'NOTA: a medição usa duração nominal dos buffers e horários de start(); não detecta silêncio dentro das amostras, mistura de fontes, nem desempenho real do núcleo.',
+   'NOTA: nenhum agendamento foi alterado nesta versão.'
+  ];
+  lastReport=lines.join('\n');$('schedulerReport').textContent=lastReport;btn.disabled=false;
+ };
+ $('schedulerCopy').onclick=async()=>{if(!lastReport){$('schedulerReport').textContent='Execute o teste primeiro.';return}try{await navigator.clipboard.writeText(lastReport);$('schedulerReport').textContent=lastReport+'\n\nCopiado.'}catch(e){$('schedulerReport').textContent=lastReport+'\n\nSelecione o texto para copiar.'}};
+})();
+</script><script>
+/* 6.0: optional bounded audio scheduling experiment; based on 5.9. */
+(()=>{'use strict';
+ const $=id=>document.getElementById(id);
+ const AC=window.AudioContext||window.webkitAudioContext;
+ let enabled=false, stats={seen:0,adjusted:0,adjustMs:0,maxMs:0,resets:0,skipped:0};
+ const tails=new WeakMap();
+ const report=()=>{
+  $('fixReport').textContent=[
+   'Correção: '+(enabled?'LIGADA':'DESLIGADA'),
+   'Fontes curtas interceptadas: '+stats.seen,
+   'Inícios ajustados: '+stats.adjusted,
+   'Adiantamento total: '+stats.adjustMs.toFixed(1)+' ms | máximo: '+stats.maxMs.toFixed(2)+' ms',
+   'Reinícios de sequência: '+stats.resets+' | ignoradas: '+stats.skipped,
+   'Nota: não mede nem corrige amostras faltantes; áudio pode continuar picotado.'
+  ].join('\n');
+ };
+ if(AC&&typeof AC.prototype.createBufferSource==='function'){
+  const originalCreate=AC.prototype.createBufferSource;
+  AC.prototype.createBufferSource=function(...args){
+   const ctx=this,node=originalCreate.apply(this,args),originalStart=node.start;
+   node.start=function(...params){
+    if(!enabled)return originalStart.apply(this,params);
+    const duration=node.buffer?.duration,offset=Number(params[1]||0);
+    const dur=Number.isFinite(duration)?Math.max(0,Math.min(params.length>=3?Number(params[2]):duration, duration-offset)):NaN;
+    if(!(dur>0&&dur<=0.05)||node.loop){stats.skipped++;return originalStart.apply(this,params)}
+    stats.seen++;
+    const now=ctx.currentTime;
+    const originalWhen=Number(params[0]||0);
+    const requested=Math.max(now,originalWhen);
+    const lead=Number($('fixLead').value)/1000;
+    const maxAdjust=Number($('fixLimit').value)/1000;
+    const previous=tails.get(ctx);
+    let when=requested;
+    // Do not pull sound into the past or move it more than the selected limit.
+    // Reset at large gaps: these may indicate a pause or separate audio stream.
+    if(previous&&requested-previous.end>0.001&&requested-previous.end<0.15&&previous.end>now+0.002){
+     const desired=Math.max(now+0.002,previous.end);
+     when=Math.max(desired,requested-maxAdjust);
+     when=Math.min(when,requested);
+     if(when<requested-0.0005){const ms=(requested-when)*1000;stats.adjusted++;stats.adjustMs+=ms;stats.maxMs=Math.max(stats.maxMs,ms)}
+    }else if(previous&&requested-previous.end>=0.15){stats.resets++}
+    // Never maintain a runaway queue; reset if a new segment is too far ahead.
+    if(when>now+lead){stats.resets++;tails.delete(ctx);return originalStart.apply(this,params)}
+    tails.set(ctx,{end:when+dur});
+    const adjusted=params.length?[when,...params.slice(1)]:[when];
+    return originalStart.apply(this,adjusted);
+   };
+   return node;
+  };
+ }
+ $('fixToggle').onclick=()=>{enabled=!enabled;$('fixToggle').textContent=enabled?'🟢 Correção: LIGADA':'🔴 Correção: DESLIGADA';$('fixToggle').setAttribute('aria-pressed',String(enabled));$('fixToggle').style.background=enabled?'#23664a':'';report()};
+ $('fixReset').onclick=()=>{stats={seen:0,adjusted:0,adjustMs:0,maxMs:0,resets:0,skipped:0};report()};
+ setInterval(report,1200);report();
+})();
+</script>
+<style>
+/* Xbox edition: native gamepad, no touch overlay. Immersive mode preserves 4:3 content. */
+body.xbox-mode #n64overlay,body.xbox-mode #padstatus{display:none!important}
+body.xbox-mode #mobilebar{display:none!important}
+body.xbox-mode #game{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;aspect-ratio:auto!important;border:0!important;border-radius:0!important;z-index:1000!important;background:#000!important}
+body.xbox-mode{overflow:hidden!important;background:#000!important}
+body.xbox-mode #game canvas{object-fit:contain!important}
+body.xbox-mode #game iframe{width:100%!important;height:100%!important}
+body.xbox-mode #xboxExit{display:block!important}
+#xboxExit{display:none;position:fixed;z-index:1100;top:10px;right:10px;padding:8px 12px;opacity:.55}
+#xboxExit:focus,#xboxExit:hover{opacity:1}
+</style>
+<button id="xboxExit" type="button">✕ Sair da tela cheia</button>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id);
+const st=$('xboxStatus');let last='',tick=0;
+function activePad(){try{return [...(navigator.getGamepads?.()||[])].find(g=>g&&g.connected)||null}catch(e){return null}}
+function scan(){const g=activePad();const pressed=g?g.buttons.map((b,i)=>b?.pressed?i:null).filter(v=>v!==null):[];
+ const axes=g?g.axes.map(x=>Number(x.toFixed(2))):[];
+ const status=g?`CONTROLE DETECTADO: ${g.id}
+Índice: ${g.index} | Mapeamento: ${g.mapping||'não informado'}
+Botões pressionados (índices): ${pressed.join(', ')||'nenhum'}
+Eixos: ${axes.join(', ')||'nenhum'}`:'Nenhum controle detectado pelo navegador. Pressione A no controle Xbox e aguarde.\nSe não aparecer, o Edge pode não disponibilizar Gamepad API nesta página.';
+ if(status!==last){st.textContent=status;last=status}
+ tick=requestAnimationFrame(scan);
+}
+$('xboxWake').onclick=()=>{const g=activePad();st.textContent=g?'Controle encontrado: '+g.id:'Pressione um botão do controle. A detecção depende da Gamepad API do Edge.'};
+$('xboxHelp').onclick=()=>{$('xboxMapping').hidden=!$('xboxMapping').hidden};
+function exitMode(){document.body.classList.remove('xbox-mode');if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}
+$('xboxExit').onclick=exitMode;
+$('xboxFullscreen').onclick=async()=>{
+ document.body.classList.add('xbox-mode');
+ try{await document.documentElement.requestFullscreen()}catch(e){st.textContent='Fullscreen API não autorizada: '+e.message+'\nO modo imersivo CSS continua ativo. Para sair, use o botão no canto superior direito.'}
+};
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement)document.body.classList.remove('xbox-mode')});
+window.addEventListener('gamepadconnected',e=>{st.textContent='Controle conectado: '+e.gamepad.id});
+window.addEventListener('gamepaddisconnected',()=>{st.textContent='Controle desconectado.'});
+// Keep native EmulatorJS gamepad handling: do not simulate buttons in parallel.
+scan();
+})();
+</script>
+<script>
+(()=>{'use strict';
+ const box=document.getElementById('keyReport'), focus=document.getElementById('keyFocus');let lines=[];
+ function record(e){if(document.activeElement!==focus)return;const name=e.type+' | key='+JSON.stringify(e.key)+' | code='+JSON.stringify(e.code)+' | repeat='+e.repeat;lines.push(name);if(lines.length>20)lines.shift();box.textContent=lines.join('\n');}
+ document.addEventListener('keydown',record,true);document.addEventListener('keyup',record,true);
+ document.getElementById('keyClear').onclick=()=>{lines=[];box.textContent='Aguardando eventos de teclado...'};
+})();
+</script></body></html>
